@@ -18,6 +18,7 @@ class CanvasViewController: UIViewController {
     var trayDown: CGPoint!
     var newlyCreatedFace: UIImageView!
     var newlyCreatedFaceOriginalCenter: CGPoint!
+    var newFacePanGestureRecognizer: UIPanGestureRecognizer!
     
     @IBAction func didPanTray(_ sender: UIPanGestureRecognizer) {
         let translation = sender.translation(in: view)
@@ -52,6 +53,9 @@ class CanvasViewController: UIViewController {
             newlyCreatedFace.center = imageView.center
             newlyCreatedFace.center.y += trayView.frame.origin.y
             
+            newlyCreatedFace.isUserInteractionEnabled = true
+            newlyCreatedFace.addGestureRecognizer(newFacePanGestureRecognizer)
+            
             newlyCreatedFaceOriginalCenter = newlyCreatedFace.center
         } else if sender.state == .changed {
             newlyCreatedFace.center = CGPoint(x: newlyCreatedFaceOriginalCenter.x + translation.x, y: newlyCreatedFaceOriginalCenter.y + translation.y)
@@ -60,12 +64,26 @@ class CanvasViewController: UIViewController {
         }
     }
     
+    @objc func didPanNewFace(sender: UIPanGestureRecognizer) {
+        let translation = sender.translation(in: view)
+        
+        if sender.state == .began {
+            newlyCreatedFace = (sender.view as! UIImageView) // to get the face that we panned on.
+            newlyCreatedFaceOriginalCenter = newlyCreatedFace.center // so we can offset by translation later.
+        } else if sender.state == .changed {
+            newlyCreatedFace.center = CGPoint(x: newlyCreatedFaceOriginalCenter.x + translation.x, y: newlyCreatedFaceOriginalCenter.y + translation.y)
+        } else if sender.state == .ended {
+            print("Gesture ended")
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         trayUp = trayView.center // The initial position of the tray
         trayDown = CGPoint(x: trayView.center.x ,y: trayView.center.y + trayDownOffset) // The position of the tray transposed down
+        
+        newFacePanGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(didPanNewFace(sender:)))
     }
 
 }
