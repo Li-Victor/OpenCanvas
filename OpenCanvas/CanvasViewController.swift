@@ -18,7 +18,6 @@ class CanvasViewController: UIViewController {
     var trayDown: CGPoint!
     var newlyCreatedFace: UIImageView!
     var newlyCreatedFaceOriginalCenter: CGPoint!
-    var newFacePanGestureRecognizer: UIPanGestureRecognizer!
     
     @IBAction func didPanTray(_ sender: UIPanGestureRecognizer) {
         let translation = sender.translation(in: view)
@@ -49,14 +48,14 @@ class CanvasViewController: UIViewController {
         if sender.state == .began {
             let imageView = sender.view as! UIImageView
             newlyCreatedFace = UIImageView(image: imageView.image)
-            view.addSubview(newlyCreatedFace)
             newlyCreatedFace.center = imageView.center
             newlyCreatedFace.center.y += trayView.frame.origin.y
             
             newlyCreatedFace.isUserInteractionEnabled = true
-            newlyCreatedFace.addGestureRecognizer(newFacePanGestureRecognizer)
-            
+            newlyCreatedFace.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(didPanNewFace(sender:))))
             newlyCreatedFaceOriginalCenter = newlyCreatedFace.center
+            view.addSubview(newlyCreatedFace)
+            
         } else if sender.state == .changed {
             newlyCreatedFace.center = CGPoint(x: newlyCreatedFaceOriginalCenter.x + translation.x, y: newlyCreatedFaceOriginalCenter.y + translation.y)
         } else if sender.state == .ended {
@@ -82,8 +81,6 @@ class CanvasViewController: UIViewController {
         
         trayUp = trayView.center // The initial position of the tray
         trayDown = CGPoint(x: trayView.center.x ,y: trayView.center.y + trayDownOffset) // The position of the tray transposed down
-        
-        newFacePanGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(didPanNewFace(sender:)))
     }
 
 }
